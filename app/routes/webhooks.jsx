@@ -2,7 +2,7 @@ import { json } from "@remix-run/node";
 import shopify from "../shopify.server";
 
 export const action = async ({ request }) => {
-    console.log("Webhook Fired")
+  console.log("Webhook Fired")
   const { topic, shop, body } = await shopify.authenticate.webhook(request);
 
   if (topic === "PRODUCTS_UPDATE" || topic === "PRODUCTS_CREATE") {
