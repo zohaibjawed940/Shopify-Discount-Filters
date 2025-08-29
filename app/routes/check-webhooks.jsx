@@ -1,23 +1,20 @@
-import { GraphqlClient } from "@shopify/shopify-api"; 
-import shopify from "../shopify.server"; // adjust path if needed
+import { json } from "@remix-run/node";
+import shopify from "../shopify.server"; // your initialized shopifyApi
 
-export default async function getWebhooks() {
+export const loader = async () => {
   try {
-    // Get offline session for your shop
+    // Load the offline session for your shop
     const session = await shopify.sessionStorage.loadSession(
       `offline_filterskhazanay.myshopify.com`
     );
 
     if (!session) {
-      throw new Error("No offline session found for filterskhazanay.myshopify.com");
+      return json({ error: "No offline session found" }, { status: 400 });
     }
 
-    // Create GraphQL client
-    const client = new GraphqlClient({
-      session,
-    });
+    // Use the GraphQL client
+    const client = new shopify.clients.Graphql({ session });
 
-    // Run query
     const response = await client.query({
       data: `{
         webhookSubscriptions(first: 10) {
@@ -37,10 +34,9 @@ export default async function getWebhooks() {
       }`,
     });
 
-    console.log(response.body);
-    return Response.json(response.body);
+    return json(response.body);
   } catch (error) {
-    console.error("Error fetching webhooks:", error);
-    return Response.json({ error: error.message }, { status: 500 });
+    console.error("Error in webhooks loader:", error);
+    return json({ error: error.message }, { status: 500 });
   }
-}
+};
