@@ -2,7 +2,7 @@ import { json } from "@remix-run/node";
 import shopify from "../shopify.server";
 
 export const loader = async () => {
-  const session = await shopify.api.session.getOfflineSession("{filterskhazanay}.myshopify.com");
+  const session = await shopify.api.session.getOfflineSession("filterskhazanay.myshopify.com");
   const client = new shopify.api.clients.Graphql({ session });
 
   const response = await client.query({
