@@ -1,17 +1,16 @@
-import { json } from "@remix-run/node";
-import shopify from "../shopify.server"; // adjust path if needed
+import shopify from "../shopify.server";
 
-export const loader = async () => {
+export async function loader() {
   try {
     // Get offline session for your shop
-    const session = await shopify.api.session.getOfflineSession(
+    const session = await shopify.session.getOfflineSession(
       "filterskhazanay.myshopify.com"
     );
 
     // Initialize GraphQL client
     const client = new shopify.clients.Graphql({ session });
 
-    // Run query
+    // Run GraphQL query
     const response = await client.query({
       data: `{
         webhookSubscriptions(first: 10) {
@@ -31,11 +30,15 @@ export const loader = async () => {
       }`,
     });
 
-    console.log("Webhook subscriptions:", response.body);
+    console.log(response.body);
 
-    return json(response.body);
+    return new Response(JSON.stringify(response.body), {
+      headers: { "Content-Type": "application/json" },
+    });
   } catch (error) {
-    console.error("Error fetching webhooks:", error);
-    return json({ error: error.message }, { status: 500 });
+    console.error(error);
+    return new Response(JSON.stringify({ error: error.message }), {
+      status: 500,
+    });
   }
-};
+}
